@@ -2,7 +2,7 @@ var route = undefined;
 
 $('body').on('DOMSubtreeModified', function(){
     var doc_route = $("body").attr("data-route");
-    var route = doc_route.split('/')
+    route = doc_route ? doc_route.split('/') : undefined;
     if (route && route[0] == "Form") {
         frappe.ui.form.on(route[1], {
            refresh: function (frm) {

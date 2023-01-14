@@ -27,10 +27,14 @@ frappe.ui.form.on('Telegram User Settings', {
 				cur_frm.set_value("telegram_token", telegram_token);
 				frappe.model.get_value('Telegram Settings', {name:frm.doc.telegram_settings}, 'bot_name', (r) => {
 					if (r.bot_name) {
-						navigator.clipboard.writeText(frm.doc.telegram_token).then(()=> {
-							frappe.show_alert({message:__('Telegram Token copied to your clipboard!'), indicator:'green'}, 20);
-							window.open(`https://t.me/${r.bot_name}`, '_blank');
-						});
+						if (window.isSecureContext && navigator.clipboard) {
+							navigator.clipboard.writeText(frm.doc.telegram_token).then(()=> {
+								frappe.show_alert({message:__('Telegram Token copied to your clipboard!'), indicator:'green'}, 20);
+								window.open(`https://t.me/${r.bot_name}`, '_blank');
+							});
+						}else{
+							frm.events.unsecuredCopyToClipboard(frm.doc.telegram_token, r.bot_name);
+						}
 					}
 					
 				});
@@ -38,6 +42,23 @@ frappe.ui.form.on('Telegram User Settings', {
 			}
 		});
 	},
+
+
+	unsecuredCopyToClipboard: (text, bot_name) => {
+		const textArea = document.createElement("textarea");
+		textArea.value = text;
+		document.body.appendChild(textArea);
+		textArea.focus();
+		textArea.select();
+		try {
+		  document.execCommand('copy');
+		} catch (err) {
+		  console.error('Unable to copy to clipboard', err);
+		}
+		document.body.removeChild(textArea);
+		frappe.show_alert({message:__('Telegram Token copied to your clipboard!'), indicator:'green'}, 20);
+		window.open(`https://t.me/${bot_name}`, '_blank');
+	  },
 	
 
 	get_chat_id : function(frm) {
